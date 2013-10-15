@@ -173,9 +173,9 @@ private:
     /// Scroll to row for the given RID.
     void scrollToRid(QString rid);
 
-    QSqlTableModel*          _model;
-    SortFilterProxyModel*    _proxy;
-    QTableView*              _table;
+    QSqlTableModel*          _SqlTableModel;
+    SortFilterProxyModel*    _filterModel;
+    QTreeView*               _treeView;
     CalibrationPlot*         _plot;
     CalibrationForm*         _form;
     BackgroundColorDelegate* _delegate;
@@ -196,7 +196,7 @@ private:
     void setupDatabase();
     void setupModels();
     void setupDelegates();
-    void setupTable();
+    void setupTree();
     void setupViews();
     void setupMenus();
 

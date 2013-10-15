@@ -113,7 +113,7 @@ private:
 /* -------------------------------------------------------------------- */
 /* -------------------------------------------------------------------- */
 
-MainWindow::MainWindow() : _model(0), changeDetected(false)
+MainWindow::MainWindow() : _SqlTableModel(0), changeDetected(false)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
@@ -127,7 +127,7 @@ MainWindow::MainWindow() : _model(0), changeDetected(false)
 
     setupModels();
 
-    setupTable();
+    setupTree();
 
     setupDelegates();
 
@@ -212,63 +212,88 @@ void MainWindow::setupModels()
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
-    _model = new QSqlTableModel;
+    _SqlTableModel = new QSqlTableModel;
 
     // detect changes to model
-    connect(_model, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
-            this,     SLOT(dataChanged(const QModelIndex&, const QModelIndex&)));
+    connect(_SqlTableModel, SIGNAL(dataChanged(const QModelIndex&, const QModelIndex&)),
+            this,             SLOT(dataChanged(const QModelIndex&, const QModelIndex&)));
 
-    _model->setTable(DB_TABLE);
-    _model->setSort(clm_cal_date, Qt::AscendingOrder);
-    _model->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    _model->select();
+    _SqlTableModel->setTable(DB_TABLE);
+    _SqlTableModel->setSort(clm_cal_date, Qt::AscendingOrder);
+    _SqlTableModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
+/*
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const;
+    QSqlRecord record(int row) const;
+    QString lastQuery() const;
+    QSqlQuery query() const;
+ */
+//  qDebug() << "_SqlTableModel->selectStatement():" << _SqlTableModel->selectStatement();
+    qDebug() << "_SqlTableModel->query().lastQuery():" << _SqlTableModel->query().lastQuery();
+    qDebug() << "_SqlTableModel->rowCount():" << _SqlTableModel->rowCount();
+    qDebug() << "_SqlTableModel->columnCount():" << _SqlTableModel->columnCount();
+    qDebug() << "_SqlTableModel->canFetchMore():" << _SqlTableModel->canFetchMore();
+/*
+ * _SqlTableModel->query().lastQuery(): "" 
+ * _SqlTableModel->rowCount(): 0 
+ * _SqlTableModel->columnCount(): 24 
+ * _SqlTableModel->canFetchMore(): false 
+ */
 
-    _proxy = new SortFilterProxyModel;
-    _proxy->setDynamicSortFilter(true); // NOTE - http://doc.qt.digia.com/4.7-snapshot/qsortfilterproxymodel.html#dynamicSortFilter-prop
-    _proxy->setSourceModel(_model);
+    // TODO should I subclass QSqlTableModel and overload its select function in order to build a tree model driven by the RID and PID relationships?
+    // Nahh just beef up SortFilterProxyModel to model a tree model there.
+    _SqlTableModel->select();
+
+    _filterModel = new SortFilterProxyModel;
+    _filterModel->setDynamicSortFilter(true); // NOTE - http://doc.qt.digia.com/4.7-snapshot/qsortfilterproxymodel.html#dynamicSortFilter-prop
+    _filterModel->setSourceModel(_SqlTableModel);
 }
 
 /* -------------------------------------------------------------------- */
 
-void MainWindow::setupTable()
+void MainWindow::setupTree()
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
-    _table = new QTableView;
+    _treeView = new QTreeView;
 // TODO use a custom delegate for displaying the clm_cal_date?
 //
 // http://www.qtcentre.org/archive/index.php/t-20277.html mentions this...
 // The proper way of handling such situations is to provide a custom QAbstractItemDelegate for the widget mapper with setModelData() and setEditorData() reimplemented.
 //
-// these are inherited members of QTableView:
+// these are inherited members of QTreeView:
 // void setItemDelegateForColumn(int column, QAbstractItemDelegate *delegate);
 // QAbstractItemDelegate *itemDelegateForColumn(int column) const;
 
-    // disable editing of table
-    _table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    // disable editing of tree
+    _treeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 /* TODO this doesn't show anything... yet the columns are still draggable.  why?  
-    _table->setDragEnabled(true);
-    _table->setAcceptDrops(true);
-    _table->setDropIndicatorShown(true);
+    _treeView->setDragEnabled(true);
+    _treeView->setAcceptDrops(true);
+    _treeView->setDropIndicatorShown(true);
 */
-    _table->setModel(_proxy);
+    _treeView->setModel(_filterModel);
 
-    _table->setContextMenuPolicy( Qt::CustomContextMenu );
+    _treeView->setAlternatingRowColors(true);
 
-    QHeaderView *hH = _table->horizontalHeader();
+    _treeView->setSelectionBehavior( QAbstractItemView::SelectRows );
+
+    _treeView->setContextMenuPolicy( Qt::CustomContextMenu );
+
+    QHeaderView *hH = _treeView->header();
     hH->setContextMenuPolicy( Qt::CustomContextMenu );
 
-    _table->adjustSize();
+    _treeView->adjustSize();
 
-    connect(_table, SIGNAL(          pressed(const QModelIndex &)),
-            this,     SLOT( tableItemPressed(const QModelIndex &)));
+    connect(_treeView,  SIGNAL(          pressed(const QModelIndex &)),
+            this,         SLOT( tableItemPressed(const QModelIndex &)));
 
     connect(hH,     SIGNAL( customContextMenuRequested( const QPoint & )),
             this,     SLOT(             showHeaderMenu( const QPoint & )));
 
-    connect(_table, SIGNAL( customContextMenuRequested( const QPoint & )),
-            this,     SLOT(              showTableMenu( const QPoint & )));
+    connect(_treeView,  SIGNAL( customContextMenuRequested( const QPoint & )),
+            this,         SLOT(              showTableMenu( const QPoint & )));
 }
 
 /* -------------------------------------------------------------------- */
@@ -277,8 +302,8 @@ void MainWindow::setupDelegates()
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
-    _delegate = new BackgroundColorDelegate(_proxy);
-    _table->setItemDelegate(_delegate);
+    _delegate = new BackgroundColorDelegate(_filterModel);
+    _treeView->setItemDelegate(_delegate);
 }
 
 /* -------------------------------------------------------------------- */
@@ -306,7 +331,7 @@ void MainWindow::setupViews()
     container->setLayout(layoutHorz);
 
     splitVert->addWidget(container);
-    splitVert->addWidget(_table);
+    splitVert->addWidget(_treeView);
 
     QVBoxLayout *layout = new QVBoxLayout;
 
@@ -316,14 +341,14 @@ void MainWindow::setupViews()
     wnd->setLayout(layout);
     setCentralWidget(wnd);
 
-     _form->setModel(_proxy);
+     _form->setModel(_filterModel);
 
      _form->setEnabled(false);
 
 // TODO is this needed?
-//   QItemSelectionModel *selectionModel = new QItemSelectionModel(_proxy);
-//   _table->setSelectionModel(selectionModel);
-//   _form->setSelectionModel( _table->selectionModel() );
+//   QItemSelectionModel *selectionModel = new QItemSelectionModel(_filterModel);
+//   _treeView->setSelectionModel(selectionModel);
+//   _form->setSelectionModel( _treeView->selectionModel() );
 //   _form->setSelectionModel(selectionModel);
 //
     connect(_form, SIGNAL(removeSetPoint(int ,int)),
@@ -350,17 +375,13 @@ void MainWindow::setupViews()
     connect(this, SIGNAL(revertForm()),
             _form,  SLOT(revert()));
 
-    for (int i=0; i < _proxy->columnCount(); i++)
-        _table->resizeColumnToContents(i);
+    for (int i=0; i < _filterModel->columnCount(); i++)
+        _treeView->resizeColumnToContents(i);
 
-    QHeaderView *horizontalHeader = _table->horizontalHeader();
-    horizontalHeader->setMovable(true);
-    horizontalHeader->setStretchLastSection(true);
-    horizontalHeader->setResizeMode(QHeaderView::Interactive);
-
-    QHeaderView *verticalHeader = _table->verticalHeader();
-    verticalHeader->setResizeMode(QHeaderView::Fixed);
-    verticalHeader->hide();
+    QHeaderView *header = _treeView->header();
+    header->setMovable(true);
+    header->setStretchLastSection(true);
+    header->setResizeMode(QHeaderView::Interactive);
 }
 
 /* -------------------------------------------------------------------- */
@@ -372,9 +393,9 @@ MainWindow::~MainWindow()
     onQuit();
 
     delete _delegate;
-    delete _table;
-    delete _proxy;
-    delete _model;
+    delete _treeView;
+    delete _filterModel;
+    delete _SqlTableModel;
 
     // re-enforce uniqueness constraint (HACK - this gets dropped during 
     // simple "open... no edit... close" situations).
@@ -394,15 +415,15 @@ MainWindow::~MainWindow()
 void MainWindow::showHeaderMenu( const QPoint &pos )
 {
     // clear any multiple selections made by user
-    _table->selectionModel()->clearSelection();
+    _treeView->selectionModel()->clearSelection();
 
-    QHeaderView *hH = _table->horizontalHeader();
-    _column = hH->logicalIndexAt(pos);
+    QHeaderView *header = _treeView->header();
+    _column = header->logicalIndexAt(pos);
     std::cout << __PRETTY_FUNCTION__ << " _column: " << _column << std::endl;
 
     // Popup table menu setup... (cannot use keyboard shortcuts here)
     QMenu *headerMenu = new QMenu;
-    QString column = _model->headerData(_column, Qt::Horizontal).toString();
+    QString column = _SqlTableModel->headerData(_column, Qt::Horizontal).toString();
     QString filterBy    = tr("Filter '%1' by...").arg(column);
     QString unfilterAll = tr("Unfilter all columns");
     QString hideColumn  = tr("Hide '%1' column").arg(column);
@@ -416,20 +437,20 @@ void MainWindow::showHeaderMenu( const QPoint &pos )
     connect(headerMenu, SIGNAL(aboutToShow()), this, SLOT(headerMenu_aboutToShow()));
 
     // show the popup menu
-    headerMenu->exec( _table->mapToGlobal(pos) + QPoint(20,0) );
+    headerMenu->exec( _treeView->mapToGlobal(pos) + QPoint(20,0) );
 }
 
 /* -------------------------------------------------------------------- */
 
 void MainWindow::filterBy()
 {
-    QString column = _model->headerData(_column, Qt::Horizontal).toString();
+    QString column = _SqlTableModel->headerData(_column, Qt::Horizontal).toString();
     QString filterBy = tr("Filter '%1' by...").arg(column);
 
     bool ok;
     QString pattern = QInputDialog::getText(this, filterBy,
                            tr("Pressing OK with nothing entered unfilters this column."),
-                           QLineEdit::Normal, _proxy->filterAt(_column), &ok);
+                           QLineEdit::Normal, _filterModel->filterAt(_column), &ok);
 
     if (!ok) return;
 
@@ -440,14 +461,14 @@ void MainWindow::filterBy()
 
 void MainWindow::setFilter(int column, const QString &pattern)
 {
-    _proxy->setFilter(column, pattern);
+    _filterModel->setFilter(column, pattern);
 }
 
 /* -------------------------------------------------------------------- */
 
 void MainWindow::unfilterAll()
 {
-    _proxy->clearFilters();
+    _filterModel->clearFilters();
 }
 
 /* -------------------------------------------------------------------- */
@@ -467,7 +488,7 @@ void MainWindow::headerMenu_aboutToShow()
 
 void MainWindow::hideColumn()
 {
-    _table->setColumnHidden(_column, true);
+    _treeView->setColumnHidden(_column, true);
     QList<QAction*> actions = colsGrp->actions();
     actions[_column]->setChecked(false);
 }
@@ -491,7 +512,7 @@ void MainWindow::showColumn()
 
     int sC = allColumns.indexOf(column);
 
-    _table->setColumnHidden(sC, false);
+    _treeView->setColumnHidden(sC, false);
     QList<QAction*> actions = colsGrp->actions();
     actions[sC]->setChecked(true);
 }
@@ -501,15 +522,15 @@ void MainWindow::showColumn()
 void MainWindow::showTableMenu( const QPoint &pos )
 {
     // clear any multiple selections made by user
-    _table->selectionModel()->clearSelection();
+    _treeView->selectionModel()->clearSelection();
 
     // select the row
-    int row = _table->indexAt(pos).row();
-    _table->selectionModel()->select(_proxy->index(row, 0),
+    int row = _treeView->indexAt(pos).row();
+    _treeView->selectionModel()->select(_filterModel->index(row, 0),
       QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
     // show the popup menu
-    tableMenu->exec( _table->mapToGlobal(pos) + QPoint(20,0) );
+    tableMenu->exec( _treeView->mapToGlobal(pos) + QPoint(20,0) );
 }
 
 /* -------------------------------------------------------------------- */
@@ -605,8 +626,8 @@ void MainWindow::addColAction(QMenu *menu, const QString &text,
                               QActionGroup *group, QSignalMapper *mapper,
                               int id, bool checked)
 {
-    _model->setHeaderData(id, Qt::Horizontal, text);
-    _table->setColumnHidden(id, !checked);
+    _SqlTableModel->setHeaderData(id, Qt::Horizontal, text);
+    _treeView->setColumnHidden(id, !checked);
 
     addAction(menu, text, group, mapper, id, checked);
 }
@@ -630,7 +651,7 @@ void MainWindow::addAction(QMenu *menu, const QString &text,
 
 inline QString MainWindow::modelData(int row, int col)
 {
-    return _proxy->index(row, col).data().toString().trimmed();
+    return _filterModel->index(row, col).data().toString().trimmed();
 }
 
 /* -------------------------------------------------------------------- */
@@ -672,7 +693,7 @@ void MainWindow::tableItemPressed(const QModelIndex &)
 //  std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // get selected row number
-    int row = _table->selectionModel()->currentIndex().row();
+    int row = _treeView->selectionModel()->currentIndex().row();
 
     _lastRid = modelData(row, clm_rid);
 }
@@ -682,7 +703,7 @@ void MainWindow::tableItemPressed(const QModelIndex &)
 void MainWindow::toggleRow(int id)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
-    _table->selectionModel()->clearSelection();
+    _treeView->selectionModel()->clearSelection();
 
     // Toggle the row's hidden state
     int n = 0;
@@ -740,19 +761,19 @@ void MainWindow::hideRows()
     else
         setFilter(clm_exported, "0");
 
-    _proxy->refreshFilters();
+    _filterModel->refreshFilters();
 }
 
 /* -------------------------------------------------------------------- */
 
 void MainWindow::toggleColumn(int id)
 {
-    _table->setColumnHidden(id, !_table->isColumnHidden(id));
-    _table->resizeColumnToContents(id);
+    _treeView->setColumnHidden(id, !_treeView->isColumnHidden(id));
+    _treeView->resizeColumnToContents(id);
 
     // reduce the size of some of the larger columns
     if (id == clm_comment)
-        _table->setColumnWidth(id, 300);
+        _treeView->setColumnWidth(id, 300);
 }
 
 /* -------------------------------------------------------------------- */
@@ -825,7 +846,7 @@ void MainWindow::setupMenus()
 
     // true == unhidden
     i = 0;
-    addColAction(colsMenu, tr("Row Id"),        colsGrp, colsMapper, i++, false); // rid
+    addColAction(colsMenu, tr("Row Id"),        colsGrp, colsMapper, i++, true);  // rid
     addColAction(colsMenu, tr("Parent Id"),     colsGrp, colsMapper, i++, false); // pid
     addColAction(colsMenu, tr("Site"),          colsGrp, colsMapper, i++, true);  // Site
     addColAction(colsMenu, tr("Pulled"),        colsGrp, colsMapper, i++, false); // pulled
@@ -1232,7 +1253,7 @@ Reference(C), Harco 708094A(Ohm), Harco 708094B(Ohm), Rosemount 2984(Ohm)
         QString rid           = createRID();
         QDateTime cal_date    = QDateTime::fromString(calDate, "M/d/yyyy h:mm AP");
     
-        QSqlRecord record = _model->record();
+        QSqlRecord record = _SqlTableModel->record();
     
         // stuff the new record
         record.setValue(clm_rid,           rid);
@@ -1262,13 +1283,13 @@ Reference(C), Harco 708094A(Ohm), Harco 708094B(Ohm), Rosemount 2984(Ohm)
     
         // TODO find a row based upon cal_date
         int row = -1;  // HACK insert at top of table for now
-        _model->insertRow(row+1);
-        _model->setRecord(row+1, record);
+        _SqlTableModel->insertRow(row+1);
+        _SqlTableModel->setRecord(row+1, record);
 
         // re-apply any filtering after inserting a new row
         _lastRid = rid;
         qDebug() << "_lastRid:" << _lastRid;
-        _proxy->refreshFilters();
+        _filterModel->refreshFilters();
         scrollToLastClicked();
     }
     // Adding a new row(s) does not trigger a dataChanged event
@@ -1284,8 +1305,8 @@ int MainWindow::saveButtonClicked()
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // update calibration database 
-    if (_model && !_model->submitAll()) {
-        QString lastError = _model->lastError().text();
+    if (_SqlTableModel && !_SqlTableModel->submitAll()) {
+        QString lastError = _SqlTableModel->lastError().text();
         QSqlDatabase::database().rollback();
         QMessageBox::warning(0, tr("save"),
            tr("The database reported an error: %1") .arg(lastError));
@@ -1324,18 +1345,22 @@ int MainWindow::saveButtonClicked()
 
 void MainWindow::scrollToHome()
 {
-    QModelIndex index = _proxy->index(0, 0);
-    _table->scrollTo(index, QAbstractItemView::EnsureVisible);
-    _table->selectRow(index.row());
+    QModelIndex index = _filterModel->index(0, 0);
+    _treeView->scrollTo(index, QAbstractItemView::EnsureVisible);
+    _treeView->selectionModel()->clearSelection();
+    _treeView->selectionModel()->select(index,
+      QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 /* -------------------------------------------------------------------- */
 
 void MainWindow::scrollToEnd()
 {
-    QModelIndex index = _proxy->index(_proxy->rowCount()-1, 0);
-    _table->scrollTo(index, QAbstractItemView::EnsureVisible);
-    _table->selectRow(index.row());
+    QModelIndex index = _filterModel->index(_filterModel->rowCount()-1, 0);
+    _treeView->scrollTo(index, QAbstractItemView::EnsureVisible);
+    _treeView->selectionModel()->clearSelection();
+    _treeView->selectionModel()->select(index,
+      QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 /* -------------------------------------------------------------------- */
@@ -1357,17 +1382,19 @@ void MainWindow::scrollToEditedRow()
 void MainWindow::scrollToRid(QString rid)
 {
     QModelIndex index;
-    for (int row = 0; row < _proxy->rowCount(); row++)
+    for (int row = 0; row < _filterModel->rowCount(); row++)
         if (modelData(row, clm_rid) == rid)
-            index = _proxy->index(row, 0);
+            index = _filterModel->index(row, 0);
 
     if (!index.isValid()) {
         QMessageBox::warning(0, tr("hidden"),
           tr("Cannot reselect, row is hidden."));
         return;
     }
-    _table->scrollTo(index, QAbstractItemView::EnsureVisible);
-    _table->selectRow(index.row());
+    _treeView->scrollTo(index, QAbstractItemView::EnsureVisible);
+    _treeView->selectionModel()->clearSelection();
+    _treeView->selectionModel()->select(index,
+      QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 /* -------------------------------------------------------------------- */
@@ -1379,7 +1406,7 @@ void MainWindow::editCalButtonClicked()
     unsubmittedFormQuery(tr("Edit"));
 
     // get selected row number
-    int row = _table->selectionModel()->currentIndex().row();
+    int row = _treeView->selectionModel()->currentIndex().row();
 
     _editRid = modelData(row, clm_rid);
     if (!_editable.contains(_editRid)) {
@@ -1532,11 +1559,11 @@ void MainWindow::submitForm(int row)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
-    _proxy->setData(_proxy->index(row, clm_set_times),  form_set_times);
-    _proxy->setData(_proxy->index(row, clm_set_points), form_set_points);
-    _proxy->setData(_proxy->index(row, clm_averages),   form_averages);
-    _proxy->setData(_proxy->index(row, clm_stddevs),    form_stddevs);
-    _proxy->setData(_proxy->index(row, clm_cal),        form_cal);
+    _filterModel->setData(_filterModel->index(row, clm_set_times),  form_set_times);
+    _filterModel->setData(_filterModel->index(row, clm_set_points), form_set_points);
+    _filterModel->setData(_filterModel->index(row, clm_averages),   form_averages);
+    _filterModel->setData(_filterModel->index(row, clm_stddevs),    form_stddevs);
+    _filterModel->setData(_filterModel->index(row, clm_cal),        form_cal);
 
     changeDetected = true;
 }
@@ -1548,7 +1575,7 @@ void MainWindow::plotCalButtonClicked()
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // get selected row number
-    int row = _table->selectionModel()->currentIndex().row();
+    int row = _treeView->selectionModel()->currentIndex().row();
     plotCalButtonClicked(row);
 }
 
@@ -1732,7 +1759,7 @@ void MainWindow::unplotCalButtonClicked()
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // get selected row number
-    int row = _table->selectionModel()->currentIndex().row();
+    int row = _treeView->selectionModel()->currentIndex().row();
     unplotCalButtonClicked(row);
 }
 
@@ -1784,7 +1811,7 @@ void MainWindow::exportCalButtonClicked()
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // get selected row number
-    int row = _table->selectionModel()->currentIndex().row();
+    int row = _treeView->selectionModel()->currentIndex().row();
 
     // don't export anything that was removed
     QString removed = modelData(row, clm_removed);
@@ -1817,7 +1844,7 @@ void MainWindow::exportCsvButtonClicked()
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // get selected row number
-    int row = _table->selectionModel()->currentIndex().row();
+    int row = _treeView->selectionModel()->currentIndex().row();
 
     QStringList list_set_points = extractListFromBracedCSV(row, clm_set_points);
     if (list_set_points.isEmpty()) return;
@@ -1849,7 +1876,7 @@ void MainWindow::viewCalButtonClicked()
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // get selected row number
-    int row = _table->selectionModel()->currentIndex().row();
+    int row = _treeView->selectionModel()->currentIndex().row();
 
     // get the cal_type from the selected row
     QString cal_type = modelData(row, clm_cal_type);
@@ -1897,7 +1924,7 @@ void MainWindow::viewCsvButtonClicked()
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // get selected row number
-    int row = _table->selectionModel()->currentIndex().row();
+    int row = _treeView->selectionModel()->currentIndex().row();
 
     QString site     = modelData(row, clm_site);
     QString var_name = modelData(row, clm_var_name);
@@ -2044,12 +2071,12 @@ void MainWindow::exportAnalog(int row)
         chnMask |= 1 << channel;
 
         // select the rows of what's found
-        _table->selectionModel()->select(_proxy->index(topRow, 0),
+        _treeView->selectionModel()->select(_filterModel->index(topRow, 0),
             QItemSelectionModel::Select | QItemSelectionModel::Rows);
     } while (true);
     topRow++;
 
-    int numRows = _proxy->rowCount() - 1;
+    int numRows = _filterModel->rowCount() - 1;
     int btmRow = row;
     do {
         if (++btmRow > numRows)                                    break;
@@ -2078,7 +2105,7 @@ void MainWindow::exportAnalog(int row)
         chnMask |= 1 << channel;
 
         // select the rows of what's found
-        _table->selectionModel()->select(_proxy->index(btmRow, 0),
+        _treeView->selectionModel()->select(_filterModel->index(btmRow, 0),
             QItemSelectionModel::Select | QItemSelectionModel::Rows);
     } while (true);
     btmRow--;
@@ -2098,7 +2125,7 @@ void MainWindow::exportAnalog(int row)
 
     // extract cal_date from channel 0
     int chn0idx = -1;
-    QModelIndexList rowList = _table->selectionModel()->selectedRows();
+    QModelIndexList rowList = _treeView->selectionModel()->selectedRows();
     foreach (QModelIndex rowIndex, rowList) {
         chn0idx = rowIndex.row();
         if (modelData(chn0idx, clm_channel) == "0")
@@ -2215,7 +2242,7 @@ void MainWindow::exportBath(int row)
     saveFileAs(filename, tr("bath files")+" (*.bath)", ostr.str());
 
     // mark what's exported
-    _proxy->setData(_proxy->index(row, clm_exported), "1");
+    _filterModel->setData(_filterModel->index(row, clm_exported), "1");
 }
 
 /* -------------------------------------------------------------------- */
@@ -2329,9 +2356,9 @@ void MainWindow::exportCalFile(QString filename, std::string contents)
         return;
     }
     // mark what's exported
-    QModelIndexList rowList = _table->selectionModel()->selectedRows();
+    QModelIndexList rowList = _treeView->selectionModel()->selectedRows();
     foreach (QModelIndex rowIndex, rowList) {
-        _proxy->setData(_proxy->index(rowIndex.row(), clm_exported), "1");
+        _filterModel->setData(_filterModel->index(rowIndex.row(), clm_exported), "1");
     }
 }
 
@@ -2374,7 +2401,7 @@ void MainWindow::saveFileAs(QString filename, QString title, std::string content
 void MainWindow::cloneButtonClicked()
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
-    QModelIndex index = _table->selectionModel()->currentIndex();
+    QModelIndex index = _treeView->selectionModel()->currentIndex();
     int row = index.row();
     std::cout << "row = " << row << std::endl;
 
@@ -2389,7 +2416,7 @@ void MainWindow::cloneButtonClicked()
     QString pulled        = "0";
     QString removed       = "0";
     QString exported      = "0";
-    QDateTime cal_date    = _proxy->index(row, clm_cal_date).data().toDateTime();
+    QDateTime cal_date    = _filterModel->index(row, clm_cal_date).data().toDateTime();
     QString project_name  = modelData(row, clm_project_name);
     QString username      = getenv("USERNAME");
     QString sensor_type   = modelData(row, clm_sensor_type);
@@ -2414,7 +2441,7 @@ void MainWindow::cloneButtonClicked()
     // advance the clone's timestamp to be one second past the parent's
     cal_date = cal_date.addSecs(1);
 
-    QSqlRecord record = _model->record();
+    QSqlRecord record = _SqlTableModel->record();
 
     // paste the parent's data into its clone
     record.setValue(clm_rid,           rid);
@@ -2442,13 +2469,13 @@ void MainWindow::cloneButtonClicked()
     record.setValue(clm_temperature,   temperature);
     record.setValue(clm_comment,       comment);
 
-    _model->insertRow(row+1);
-    _model->setRecord(row+1, record);
+    _SqlTableModel->insertRow(row+1);
+    _SqlTableModel->setRecord(row+1, record);
 
     // re-apply any filtering after inserting a new row
     _lastRid = rid;
     qDebug() << "_lastRid:" << _lastRid;
-    _proxy->refreshFilters();
+    _filterModel->refreshFilters();
     scrollToLastClicked();
 
     // Adding a new row does not trigger a dataChanged event
@@ -2462,7 +2489,7 @@ void MainWindow::removeButtonClicked()
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // get selected row number
-    int row = _table->selectionModel()->currentIndex().row();
+    int row = _treeView->selectionModel()->currentIndex().row();
 
     QMessageBox::StandardButton reply;
     reply = QMessageBox::question(0, tr("Delete"),
@@ -2472,7 +2499,7 @@ void MainWindow::removeButtonClicked()
     if (reply == QMessageBox::No) return;
 
     // mark what's removed
-    _proxy->setData(_proxy->index(row, clm_removed), "1");
+    _filterModel->setData(_filterModel->index(row, clm_removed), "1");
 }
 
 /* -------------------------------------------------------------------- */

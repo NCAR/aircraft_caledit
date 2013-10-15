@@ -19,7 +19,7 @@ if not env.EnableQwt():
 
 # Compilation generates numerous warnings relative to the Qt4 code base itself when -Weffc++ is enabled
 #env['CXXFLAGS'] = ['-Weffc++','-Wall','-O2' ]
-env['CXXFLAGS'] = [ '-Wall','-O2' ]
+env['CXXFLAGS'] = [ '-Wall','-O2', '-g' ]
 
 uis = Split("""
     ViewTextDialog.ui
