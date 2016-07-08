@@ -165,7 +165,7 @@ void MainWindow::setupDatabase()
     QStringList siteList;
     siteList << "kilojoules.eol.ucar.edu";
     siteList << "hyper.raf-guest.ucar.edu";
-    siteList << "hercules.raf-ext.ucar.edu";
+    siteList << "hercules.raf-guest.ucar.edu";
 
 cerr<<"Host is:"<<QHostInfo::localHostName().toStdString()<<"\n";
     tailNumIdx[0] = "Lab_N600";
