@@ -2027,7 +2027,8 @@ void MainWindow::exportAnalog(int row)
     // extract the cal coefficients from the selected row
     QString offst[8];
     QString slope[8];
-    QRegExp rxCoeff2("\\{([+-]?\\d+\\.\\d+),([+-]?\\d+\\.\\d+)\\}");
+    // Exponential notation O.K. - JAA 9/27/2016
+    QRegExp rxCoeff2("\\{([+-]?\\d+[\\.]?\\d*[e]?[+-]?\\d*),([+-]?\\d+[\\.]?\\d*[e]?[+-]?\\d*)\\}");
 
     QString cal = modelData(row, clm_cal);
     if (rxCoeff2.indexIn(cal) == -1) {
