@@ -163,7 +163,7 @@ void MainWindow::setupDatabase()
 */
     // List of remote sites that fill a calibration database.
     QStringList siteList;
-    siteList << "petajoules.raf-acrouter.eol.ucar.edu";
+    siteList << "raf-acrouter.eol.ucar.edu";	// Tech labstation.
     siteList << "hyper.raf-guest.ucar.edu";
     siteList << "hercules.raf-guest.ucar.edu";
 
