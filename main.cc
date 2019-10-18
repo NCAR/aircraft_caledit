@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     QTranslator *translator = new QTranslator(&app);
     if (translator->load(translatorFileName, QLibraryInfo::location(QLibraryInfo::TranslationsPath)))
         app.installTranslator(translator);
-    
+
     MainWindow window;
     window.setFilter( clm_site,     siteNameFilter );
     window.setFilter( clm_var_name, varNameFilter  );
