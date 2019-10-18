@@ -139,6 +139,7 @@ MainWindow::MainWindow() : onAircraft(false),_model(0), changeDetected(false)
     setWindowTitle(tr("Edit Calibration Database"));
     QRect screenSize = QDesktopWidget().availableGeometry(this);
     resize(QSize(screenSize.width() * 0.5f, screenSize.height() * 0.9f));
+    scrollToEnd();
 
     hideRows();
 }
