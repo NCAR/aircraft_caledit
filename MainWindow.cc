@@ -137,7 +137,8 @@ MainWindow::MainWindow() : onAircraft(false),_model(0), changeDetected(false)
     setupMenus();
 
     setWindowTitle(tr("Edit Calibration Database"));
-    resize(870, 550);
+    QRect screenSize = QDesktopWidget().availableGeometry(this);
+    resize(QSize(screenSize.width() * 0.5f, screenSize.height() * 0.9f));
 
     hideRows();
 }
@@ -333,9 +334,9 @@ void MainWindow::setupViews()
     wnd->setLayout(layout);
     setCentralWidget(wnd);
 
-     _form->setModel(_proxy);
+    _form->setModel(_proxy);
 
-     _form->setEnabled(false);
+    _form->setEnabled(false);
 
 // TODO is this needed?
 //   QItemSelectionModel *selectionModel = new QItemSelectionModel(_proxy);
@@ -1253,9 +1254,9 @@ Reference(C), Harco 708094A(Ohm), Harco 708094B(Ohm), Rosemount 2984(Ohm)
         // implementation similar to cloneButtonClicked...
         QString rid           = createRID();
         QDateTime cal_date    = QDateTime::fromString(calDate, "M/d/yyyy h:mm AP");
-    
+
         QSqlRecord record = _model->record();
-    
+
         // stuff the new record
         record.setValue(clm_rid,           rid);
         record.setValue(clm_pid,           "");
@@ -1281,7 +1282,7 @@ Reference(C), Harco 708094A(Ohm), Harco 708094B(Ohm), Rosemount 2984(Ohm)
         record.setValue(clm_cal,           cals[c]);
         record.setValue(clm_temperature,   "nan");
         record.setValue(clm_comment,       comment);
-    
+
         // TODO find a row based upon cal_date
         int row = -1;  // HACK insert at top of table for now
         _model->insertRow(row+1);
@@ -1305,7 +1306,7 @@ int MainWindow::saveButtonClicked()
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
-    // update calibration database 
+    // update calibration database
     if (_model && !_model->submitAll()) {
         QString lastError = _model->lastError().text();
         QSqlDatabase::database().rollback();
@@ -1654,8 +1655,8 @@ void MainWindow::plotCalButtonClicked(int row)
         aList = list_averages;
     QStringListIterator iX(aList);
 
-    float max = -9999.9; 
-    float min =  9999.9; 
+    float max = -9999.9;
+    float min =  9999.9;
     std::cout << "min: " << min << " max: " << max << std::endl;
     while (iX.hasNext()) {
         QString iPs = iX.next();
@@ -1679,7 +1680,7 @@ void MainWindow::plotCalButtonClicked(int row)
       y[i] = numeric::PolyEval(_cals, x[i]);
       vdc += step;
     }
-    
+
     QVector<QPointF>* actual = new QVector<QPointF>;
 
     QStringListIterator iA(list_averages);
@@ -1793,8 +1794,8 @@ void MainWindow::unplotCalButtonClicked(int row)
             curve->actual->detach();
             curve->fitted->detach();
             _plot->curves.removeOne(curve);
-        } 
-    } 
+        }
+    }
     _plot->qwtPlot->replot();
     _delegate->unhighlightRow(rid);
 }
@@ -1906,7 +1907,7 @@ void MainWindow::viewCalButtonClicked()
         filename = csvfile_dir;
         filename += project_name + "_" + sensor_type + "_" + serial_number + ".bath";
     }
-    else 
+    else
         return;
 
     viewFile(filename);
@@ -2033,7 +2034,7 @@ void MainWindow::exportAnalog(int row)
     QString cal = modelData(row, clm_cal);
     if (rxCoeff2.indexIn(cal) == -1) {
         QMessageBox::information(0, tr("notice"),
-          tr("You must select a calibration matching\n\n'") + rxCoeff2.pattern() + 
+          tr("You must select a calibration matching\n\n'") + rxCoeff2.pattern() +
           tr("'\n\nto export an analog calibration."));
         return;
     }
@@ -2062,7 +2063,7 @@ void MainWindow::exportAnalog(int row)
         cal = modelData(topRow, clm_cal);
         if (rxCoeff2.indexIn(cal) == -1) {
             QMessageBox::information(0, tr("notice"),
-              tr("You must select a calibration matching\n\n'") + rxCoeff2.pattern() + 
+              tr("You must select a calibration matching\n\n'") + rxCoeff2.pattern() +
               tr("'\n\nto export an analog calibration."));
             return;
         }
@@ -2097,7 +2098,7 @@ void MainWindow::exportAnalog(int row)
         cal = modelData(btmRow, clm_cal);
         if (rxCoeff2.indexIn(cal) == -1) {
             QMessageBox::information(0, tr("notice"),
-              tr("You must select a calibration matching\n\n'") + rxCoeff2.pattern() + 
+              tr("You must select a calibration matching\n\n'") + rxCoeff2.pattern() +
               tr("'\n\nto export an analog calibration."));
             return;
         }
@@ -2371,34 +2372,34 @@ void MainWindow::exportCalFile(QString filename, std::string contents)
 void MainWindow::saveFileAs(QString filename, QString title, std::string contents)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
-    
+
     // provide a dialog for the user to select what to save as...
     filename = QFileDialog::getSaveFileName(this, tr("Save File"),
                  filename, title);
-                 
+
     if (filename.isEmpty()) return;
-    
+
     std::cout << "Writing results to: ";
     std::cout << filename.toStdString() << std::endl;
-    std::cout << contents << std::endl; 
-    
+    std::cout << contents << std::endl;
+
     // TODO - why isn't older files being completely replaced here?
     // HACK remove previous file first
     QFile::remove(filename);
     int fd = ::open( filename.toStdString().c_str(),
                      O_WRONLY | O_CREAT, 0664);
-                     
-    if (fd == -1) {  
+
+    if (fd == -1) {
         std::ostringstream ostr;
         ostr << tr("failed to save results to:\n").toStdString();
         ostr << filename.toStdString() << std::endl;
         ostr << tr(strerror(errno)).toStdString();
         QMessageBox::warning(0, tr("error"), ostr.str().c_str());
         return;
-    }   
+    }
     write(fd, contents.c_str(), contents.length());
     ::close(fd);
-}   
+}
 
 /* -------------------------------------------------------------------- */
 
@@ -2493,7 +2494,7 @@ void MainWindow::removeButtonClicked()
     bool ok = true;
     int numEmptyText = 0;
     QInputDialog* inputDialog = new QInputDialog();
-    
+
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // get selected row number
@@ -2515,16 +2516,16 @@ void MainWindow::removeButtonClicked()
 
     QString text;
 
-    while (ok && text.isEmpty()) 
+    while (ok && text.isEmpty())
         if (numEmptyText == 0) {
-            text = inputDialog->getText(NULL, "DeleteRow Reason", 
-                       "Delete Comment:", QLineEdit::Normal, 
+            text = inputDialog->getText(NULL, "DeleteRow Reason",
+                       "Delete Comment:", QLineEdit::Normal,
                        "DELETED because", &ok);
             numEmptyText++;
         }
         else
             text = inputDialog->getText(NULL, "DeleteRow Reason",
-                       "Please Enter Non-Blank Delete Comment:", 
+                       "Please Enter Non-Blank Delete Comment:",
                        QLineEdit::Normal, "-DELETED because", &ok);
 
     // Bail out if user clicks Cancel
@@ -2546,7 +2547,7 @@ void MainWindow::removeButtonClicked()
 
 void MainWindow::changeFitButtonClicked(int row, int order)
 {
-    std::cout << __PRETTY_FUNCTION__ << " row: " << row << " order: " << order 
+    std::cout << __PRETTY_FUNCTION__ << " row: " << row << " order: " << order
          << std::endl;
 
     QStringList list_averages   = extractListFromBracedCSV(form_averages);
