@@ -339,6 +339,10 @@ void MainWindow::setupViews()
 
     _form->setEnabled(false);
 
+    QList<int> ratio;
+    ratio << 1000 << 1000;
+    splitVert->setSizes(ratio);
+
 // TODO is this needed?
 //   QItemSelectionModel *selectionModel = new QItemSelectionModel(_proxy);
 //   _table->setSelectionModel(selectionModel);
