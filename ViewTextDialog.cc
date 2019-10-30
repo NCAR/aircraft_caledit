@@ -12,5 +12,6 @@ ViewTextDialog::ViewTextDialog(QWidget *parent) : QDialog(parent)
 void ViewTextDialog::setContents(const QString *text)
 {
     textView->setFontFamily("Courier");
-    textView->setPlainText(*text);
+    textView->clear();
+    textView->insertPlainText(*text);
 }
