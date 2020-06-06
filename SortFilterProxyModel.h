@@ -1,7 +1,7 @@
 #ifndef SORTFILTERPROXYMODEL_H
 #define SORTFILTERPROXYMODEL_H
 
-#include <QSortFilterProxyModel>
+#include <QtGui/QSortFilterProxyModel>
 
 /**
  * @class SortFilterProxyModel

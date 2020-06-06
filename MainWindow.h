@@ -1,9 +1,9 @@
 #ifndef _MainWindow_h_
 #define _MainWindow_h_
 
-#include <QMainWindow>
-#include <QSignalMapper>
-#include <QTableView>
+#include <QtGui/QMainWindow>
+#include <QtCore/QSignalMapper>
+#include <QtGui/QTableView>
 
 #include <map>
 #include <string>
@@ -15,7 +15,7 @@
 #include "CalibrationForm.h"
 #include "SortFilterProxyModel.h"
 
-#include <QList>
+#include <QtCore/QList>
 
 QT_BEGIN_NAMESPACE
 class QActionGroup;

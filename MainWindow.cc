@@ -27,21 +27,21 @@
 //#include <QtGui/QLineEdit>
 #include <QtSql/QSqlTableModel>
 #include <QtSql/QSqlError>
-#include <QSqlDatabase>
+#include <QtSql/QSqlDatabase>
 
-#include <QTextStream>
-#include <QFileDialog>
-#include <QDir>
+#include <QtCore/QTextStream>
+#include <QtGui/QFileDialog>
+#include <QtCore/QDir>
 
-#include <QDateTime>
-#include <QSplitter>
-#include <QSqlQuery>
-#include <QSqlRecord>
-#include <QInputDialog>
+#include <QtCore/QDateTime>
+#include <QtGui/QSplitter>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlRecord>
+#include <QtGui/QInputDialog>
 
-#include <QHostInfo>
-#include <QProcess>
-#include <QRegExp>
+#include <QtNetwork/QHostInfo>
+#include <QtCore/QProcess>
+#include <QtCore/QRegExp>
 
 #include <qwt_plot.h>
 #include <qwt_legend.h>
@@ -61,7 +61,7 @@
 /* -------------------------------------------------------------------- */
 /* -------------------------------------------------------------------- */
 /* -------------------------------------------------------------------- */
-#include <QItemDelegate>
+#include <QtGui/QItemDelegate>
 
 /**
  * @class BackgroundColorDelegate

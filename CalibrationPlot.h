@@ -3,7 +3,7 @@
 
 //#include <QDataWidgetMapper>
 //#include <QItemDelegate>
-#include <QtGui>
+#include <QtGui/QtGui>
 
 class QColor;
 class QwtPlotCurve;

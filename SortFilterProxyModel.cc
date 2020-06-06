@@ -1,4 +1,4 @@
-#include <QDebug>
+#include <QtCore/QDebug>
 #include <iostream>
 #include "SortFilterProxyModel.h"
 

@@ -3,16 +3,15 @@
 
 #include <iostream>
 
-#include <QMessageBox>
-#include <QSqlQuery>
-#include <QSqlRelationalDelegate>
+#include <QtGui/QMessageBox>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlRelationalDelegate>
 
 //#include "logx/Logging.h"
 
 //LOGGING("CalibrationForm");
 
 /* -------------------------------------------------------------------- */
-
 CalibrationForm::CalibrationForm(QWidget* parent) : QWidget(parent)
 {
   std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -55,7 +54,7 @@ CalibrationForm::CalibrationForm(QWidget* parent) : QWidget(parent)
         _tableWidget->setCellWidget(r, 5, _setDateTimeList[r] );
     }
     _tableWidget->resizeColumnsToContents();
-    _tableWidget->horizontalHeader()->setStretchLastSection( true ); 
+    _tableWidget->horizontalHeader()->setStretchLastSection( true );
     _tableWidget->horizontalHeader()->setResizeMode(1, QHeaderView::Fixed);
 
     _currCalCList.append(_currCalC0);
@@ -85,7 +84,6 @@ CalibrationForm::CalibrationForm(QWidget* parent) : QWidget(parent)
 }
 
 /* -------------------------------------------------------------------- */
-
 void CalibrationForm::setModel(QAbstractItemModel *model)
 {
     _model = model;
@@ -93,7 +91,6 @@ void CalibrationForm::setModel(QAbstractItemModel *model)
 }
 
 /* -------------------------------------------------------------------- */
-
 void CalibrationForm::commitData(QWidget* widget)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -121,7 +118,6 @@ void CalibrationForm::commitData(QWidget* widget)
 }
 
 /* -------------------------------------------------------------------- */
-
 QStringListModel* CalibrationForm::setupComboModel(QString sql_column)
 {
 //  std::cout << __PRETTY_FUNCTION__ << " : " << sql_column.toStdString() << std::endl;
@@ -152,7 +148,6 @@ QStringListModel* CalibrationForm::setupComboModel(QString sql_column)
 }
 
 /* -------------------------------------------------------------------- */
-
 void CalibrationForm::setupMapper()
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -197,7 +192,6 @@ void CalibrationForm::setupMapper()
 }
 
 /* -------------------------------------------------------------------- */
-
 void CalibrationForm::setRow(int row)
 {
     _row = row;
@@ -205,7 +199,6 @@ void CalibrationForm::setRow(int row)
 }
 
 /* -------------------------------------------------------------------- */
-
 void CalibrationForm::setEnabled(bool state)
 {
     std::cout << __PRETTY_FUNCTION__ << " state: " << state << std::endl;
@@ -246,7 +239,6 @@ void CalibrationForm::setEnabled(bool state)
 }
 
 /* -------------------------------------------------------------------- */
-
 void CalibrationForm::removeSetPoint( int index )
 {
     std::cout << "removeSetPoint index: " << index << std::endl;
@@ -268,9 +260,8 @@ void CalibrationForm::removeSetPoint( int index )
     _revertBtn->setEnabled(true);
     _submitBtn->setEnabled(true);
 }
-                                                                                                                                                                                                     
-/* -------------------------------------------------------------------- */
 
+/* -------------------------------------------------------------------- */
 void CalibrationForm::changeFitButtonClicked(int order)
 {
     std::cout << "changeFitButtonClicked order: " << order << std::endl;
@@ -282,7 +273,6 @@ void CalibrationForm::changeFitButtonClicked(int order)
 }
 
 /* -------------------------------------------------------------------- */
-
 void CalibrationForm::revert()
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
@@ -294,7 +284,6 @@ void CalibrationForm::revert()
 }
 
 /* -------------------------------------------------------------------- */
-
 void CalibrationForm::submit()
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;

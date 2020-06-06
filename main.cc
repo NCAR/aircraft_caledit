@@ -1,7 +1,7 @@
-#include <QApplication>
-#include <QTranslator>
-#include <QLocale>
-#include <QLibraryInfo>
+#include <QtGui/QApplication>
+#include <QtCore/QTranslator>
+#include <QtCore/QLocale>
+#include <QtCore/QLibraryInfo>
 
 #include <unistd.h>
 #include <iostream>

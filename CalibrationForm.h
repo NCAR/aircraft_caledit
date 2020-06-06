@@ -1,10 +1,10 @@
 #ifndef _CalibrationForm_h_
 #define _CalibrationForm_h_
 
-#include <QAbstractItemModel>
-#include <QStringListModel>
-#include <QDataWidgetMapper>
-#include <QPushButton>
+#include <QtCore/QAbstractItemModel>
+#include <QtGui/QStringListModel>
+#include <QtGui/QDataWidgetMapper>
+#include <QtGui/QPushButton>
 
 #include "ui_CalibrationForm.h"
 
