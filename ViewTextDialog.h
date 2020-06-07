@@ -1,8 +1,8 @@
 #ifndef _ViewTextDialog_h_
 #define _ViewTextDialog_h_
 
-#include <QtWidgets/QDialog>
 #include <QtCore/QString>
+#include <QtWidgets/QDialog>
 
 #include "ui_ViewTextDialog.h"
 

@@ -7,16 +7,6 @@ from SCons.Errors import StopError
 
 env = Environment(tools = ['default', 'qt5', 'qtsql', 'qtgui', 'qtwidgets', 'qtnetwork', 'qtcore', 'qwt', 'gsl'])
 
-#qt4Modules = Split('QtSql QtGui QtCore QtNetwork')
-#if not env.EnableQt4Modules(qt4Modules):
-#    raise StopError("qt4 modules could not be enabled.")
-
-if not env.EnableQwt():
-    raise StopError("qwt.h not found.  "
-                    "Do \"scons --config=force\" to redo the check, "
-                    "or set QWTDIR.  "
-                    "See config.log for more information")
-
 # Compilation generates numerous warnings relative to the Qt4 code base itself when -Weffc++ is enabled
 #env['CXXFLAGS'] = ['-Weffc++','-Wall','-O2' ]
 env['CXXFLAGS'] = [ '-Wall','-O2','-std=c++11' ]

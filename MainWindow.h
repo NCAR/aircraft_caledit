@@ -3,7 +3,6 @@
 
 #include <QMainWindow>
 #include <QSignalMapper>
-#include <QTableView>
 
 #include <map>
 #include <string>
@@ -20,10 +19,10 @@
 QT_BEGIN_NAMESPACE
 class QActionGroup;
 class QMenu;
-class QMenuBar;
 class QSqlTableModel;
 class QItemSelectionModel;
 class QStringList;
+class QTableView;
 QT_END_NAMESPACE
 
 class BackgroundColorDelegate;

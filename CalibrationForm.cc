@@ -3,6 +3,9 @@
 
 #include <iostream>
 
+#include <QtCore/QAbstractItemModel>
+#include <QtCore/QStringListModel>
+#include <QtWidgets/QDataWidgetMapper>
 #include <QtWidgets/QMessageBox>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRelationalDelegate>

@@ -17,33 +17,33 @@
 
 #include <gsl/gsl_statistics_double.h>
 
+#include <QtCore/QDateTime>
+#include <QtCore/QDir>
+#include <QtCore/QList>
+#include <QtCore/QProcess>
+#include <QtCore/QRegExp>
+#include <QtCore/QTextStream>
 #include <QtCore/QUuid>
 
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
+#include <QtWidgets/QFileDialog>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QInputDialog>
 #include <QtWidgets/QMenuBar>
 #include <QtWidgets/QMenu>
-
 #include <QtWidgets/QMessageBox>
-#include <QtWidgets/QHeaderView>
-//#include <QtGui/QLineEdit>
-#include <QtSql/QSqlTableModel>
-#include <QtSql/QSqlError>
-#include <QtSql/QSqlDatabase>
-
-#include <QtCore/QTextStream>
-#include <QtWidgets/QFileDialog>
-#include <QtCore/QDir>
-
-#include <QtCore/QDateTime>
 #include <QtWidgets/QSplitter>
+#include <QtWidgets/QTableView>
+
+//#include <QtGui/QLineEdit>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlError>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
-#include <QInputDialog>
+#include <QtSql/QSqlTableModel>
 
 #include <QtNetwork/QHostInfo>
-#include <QtCore/QProcess>
-#include <QtCore/QRegExp>
 
 #include <qwt_plot.h>
 #include <qwt_legend.h>
@@ -51,7 +51,6 @@
 //#include <qwt_plot_curve.h>
 #include <qwt_plot_zoomer.h>
 
-#include <QtCore/QList>
 #include "PolyEval.h"
 
 #define MAX_BATH_PROBES 10

@@ -1,8 +1,6 @@
 #ifndef _CalibrationPlot_h_
 #define _CalibrationPlot_h_
 
-//#include <QDataWidgetMapper>
-//#include <QItemDelegate>
 #include <QtGui/QtGui>
 
 class QColor;
@@ -32,7 +30,7 @@ public:
 
 /**
  * @class CalibrationPlot
- * A container widget that stores the curves and maintains their colors. 
+ * A container widget that stores the curves and maintains their colors.
  */
 class CalibrationPlot : public QWidget, public Ui::CalibrationPlot
 {

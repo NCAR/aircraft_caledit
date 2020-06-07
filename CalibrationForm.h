@@ -1,15 +1,16 @@
 #ifndef _CalibrationForm_h_
 #define _CalibrationForm_h_
 
-#include <QtCore/QAbstractItemModel>
-#include <QtCore/QStringListModel>
-#include <QtWidgets/QDataWidgetMapper>
-#include <QtWidgets/QButtonGroup>
-#include <QtWidgets/QPushButton>
-
 #include "ui_CalibrationForm.h"
 
 #define nRows 20
+
+class QStringListModel;
+class QAbstractItemModel;
+class QDataWidgetMapper;
+class QButtonGroup;
+class QPushButton;
+
 
 /**
  * @class CalibrationForm
