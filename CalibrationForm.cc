@@ -5,6 +5,7 @@
 
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QStringListModel>
+#include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDataWidgetMapper>
 #include <QtWidgets/QMessageBox>
 #include <QtSql/QSqlQuery>
