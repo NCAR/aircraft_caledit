@@ -19,25 +19,27 @@
 
 #include <QtCore/QUuid>
 
-#include <QtGui/QMenuBar>
-#include <QtGui/QMenu>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QDesktopWidget>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMenu>
 
-#include <QtGui/QMessageBox>
-#include <QtGui/QHeaderView>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QHeaderView>
 //#include <QtGui/QLineEdit>
 #include <QtSql/QSqlTableModel>
 #include <QtSql/QSqlError>
 #include <QtSql/QSqlDatabase>
 
 #include <QtCore/QTextStream>
-#include <QtGui/QFileDialog>
+#include <QtWidgets/QFileDialog>
 #include <QtCore/QDir>
 
 #include <QtCore/QDateTime>
-#include <QtGui/QSplitter>
+#include <QtWidgets/QSplitter>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRecord>
-#include <QtGui/QInputDialog>
+#include <QInputDialog>
 
 #include <QtNetwork/QHostInfo>
 #include <QtCore/QProcess>
@@ -61,11 +63,11 @@
 /* -------------------------------------------------------------------- */
 /* -------------------------------------------------------------------- */
 /* -------------------------------------------------------------------- */
-#include <QtGui/QItemDelegate>
+#include <QItemDelegate>
 
 /**
  * @class BackgroundColorDelegate
- * A delgate that colors the lines in the table view. 
+ * A delgate that colors the lines in the table view.
  */
 class BackgroundColorDelegate: public QItemDelegate
 {
@@ -137,7 +139,7 @@ MainWindow::MainWindow() : onAircraft(false),_model(0), changeDetected(false)
     setupMenus();
 
     setWindowTitle(tr("Edit Calibration Database"));
-    QRect screenSize = QDesktopWidget().availableGeometry(this);
+    QRect screenSize = QApplication::desktop()->availableGeometry(this);
     resize(QSize(screenSize.width() * 0.5f, screenSize.height() * 0.9f));
     setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, size(), screenSize));
     scrollToEnd();
@@ -191,15 +193,15 @@ cerr<<"Host is:"<<QHostInfo::localHostName().toStdString()<<"\n";
         onAircraft = true;
     }
     // extract some environment variables
-    calfile_dir = QString::fromAscii(getenv("PROJ_DIR")) +
+    calfile_dir = QString::fromLatin1(getenv("PROJ_DIR")) +
                          "/Configuration/raf/cal_files/";
-    csvfile_dir = QString::fromAscii(getenv("PWD")) +
+    csvfile_dir = QString::fromLatin1(getenv("PWD")) +
                          "/";
 
 #ifdef SANDBOX
     // point sandboxed version to someplace benign
-    calfile_dir = QString::fromAscii(getenv("HOME")) + "/";
-    csvfile_dir = QString::fromAscii(getenv("HOME")) + "/";
+    calfile_dir = QString::fromLatin1(getenv("HOME")) + "/";
+    csvfile_dir = QString::fromLatin1(getenv("HOME")) + "/";
 #endif
 
     qDebug() << "calfile_dir: " << calfile_dir;
@@ -378,12 +380,12 @@ void MainWindow::setupViews()
         _table->resizeColumnToContents(i);
 
     QHeaderView *horizontalHeader = _table->horizontalHeader();
-    horizontalHeader->setMovable(true);
+    horizontalHeader->setSectionsMovable(true);
     horizontalHeader->setStretchLastSection(true);
-    horizontalHeader->setResizeMode(QHeaderView::Interactive);
+    horizontalHeader->setSectionResizeMode(QHeaderView::Interactive);
 
     QHeaderView *verticalHeader = _table->verticalHeader();
-    verticalHeader->setResizeMode(QHeaderView::Fixed);
+    verticalHeader->setSectionResizeMode(QHeaderView::Fixed);
     verticalHeader->hide();
 }
 
@@ -400,9 +402,9 @@ MainWindow::~MainWindow()
     delete _proxy;
     delete _model;
 
-    // re-enforce uniqueness constraint (HACK - this gets dropped during 
+    // re-enforce uniqueness constraint (HACK - this gets dropped during
     // simple "open... no edit... close" situations).
-    QString cmd( "ALTER TABLE ONLY "DB_TABLE" ADD CONSTRAINT "DB_TABLE"_rid_key UNIQUE (rid)");
+    QString cmd = QString("ALTER TABLE ONLY %1 ADD CONSTRAINT %2_rid_key UNIQUE (rid)").arg(DB_TABLE).arg(DB_TABLE);
     qDebug() << "cmd:" << cmd;
     QSqlQuery query(cmd);
     query.exec();
@@ -915,7 +917,7 @@ void MainWindow::openDatabase(QString hostname)
             }
         } else {
             // unknown error
-            ostr << tr(errMsg.toAscii().data()).toStdString();
+            ostr << tr(errMsg.toLatin1().data()).toStdString();
         }
         db = QSqlDatabase();
         QSqlDatabase::removeDatabase(hostname);
@@ -1014,11 +1016,11 @@ void MainWindow::importRemoteCalibTable(QString remote)
         return;
     }
     QString connectStr = QString("'host=%1 user=ads password=snoitarbilac "
-                       "dbname="DB_NAME"'").arg(remote);
+                       "dbname=%2'").arg(remote).arg(DB_NAME);
     qDebug() << "connectStr:" << connectStr;
 
-    QString insertStr = QString("INSERT INTO "DB_TABLE" SELECT * FROM dblink(%1, "
-      "'SELECT * FROM "DB_TABLE" WHERE pulled=''0'' ORDER BY cal_date') AS ("
+    QString insertStr = QString("INSERT INTO %1 SELECT * FROM dblink(%2, "
+      "'SELECT * FROM %3 WHERE pulled=''0'' ORDER BY cal_date') AS ("
       "rid character(36),"
       "pid character(36),"
       "site character varying(20),"
@@ -1042,19 +1044,19 @@ void MainWindow::importRemoteCalibTable(QString remote)
       "stddevs double precision[],"
       "cal double precision[],"
       "temperature double precision,"
-      "comment character varying(256));").arg(connectStr);
+      "comment character varying(256));").arg(DB_TABLE).arg(connectStr).arg(DB_TABLE);
 
     QString pulledQueryStr = QString(
-      "SELECT cal_date, site, cal_type, serial_number, var_name FROM "DB_TABLE""
-      " WHERE pulled=\'0\' ORDER BY cal_date");
+      "SELECT cal_date, site, cal_type, serial_number, var_name FROM %1"
+      " WHERE pulled=\'0\' ORDER BY cal_date").arg(DB_TABLE);
 
     QString updateMasterStr = QString(
-      "UPDATE "DB_TABLE" SET pulled=1 WHERE pulled=''0''");
+      "UPDATE %1 SET pulled=1 WHERE pulled=''0''").arg(DB_TABLE);
 
     QString updateRemoteStr = QString("SELECT * FROM dblink_exec(%1, '%2')")
-      .arg(connectStr, updateMasterStr);
+      .arg(connectStr).arg(updateMasterStr);
 
-    updateMasterStr = QString("UPDATE "DB_TABLE" SET pulled=1");
+    updateMasterStr = QString("UPDATE %1 SET pulled=1").arg(DB_TABLE);
 
     // insert unpulled rows from remote database
     qDebug() << "insertStr:" << insertStr;
@@ -1324,13 +1326,17 @@ int MainWindow::saveButtonClicked()
     std::cout << "resort table by cal_date" << std::endl;
     QSqlQuery query(QSqlDatabase::database());
 
-    QString script =
-      "CREATE TABLE resorted (LIKE "DB_TABLE" INCLUDING INDEXES);"
-      "INSERT INTO resorted SELECT * FROM "DB_TABLE" ORDER BY cal_date;"
-      "DROP TABLE "DB_TABLE";"
-      "CREATE TABLE "DB_TABLE" (LIKE resorted INCLUDING INDEXES);"
-      "INSERT INTO "DB_TABLE" SELECT * FROM resorted;"
-      "DROP TABLE resorted;";
+    QString script(
+      "CREATE TABLE resorted (LIKE "); script.append(DB_TABLE);
+    script += " INCLUDING INDEXES);";
+    script += "INSERT INTO resorted SELECT * FROM "; script.append(DB_TABLE);
+    script += " ORDER BY cal_date;";
+    script += "DROP TABLE "; script.append(DB_TABLE); script +=";";
+    script += "CREATE TABLE "; script.append(DB_TABLE);
+    script += " (LIKE resorted INCLUDING INDEXES);";
+    script += "INSERT INTO "; script.append(DB_TABLE);
+    script += " SELECT * FROM resorted;";
+    script += "DROP TABLE resorted;";
 
     QStringList scriptQueries = script.split(';');
 
@@ -1443,9 +1449,11 @@ void MainWindow::initializeForm(int row)
     std::cout << "cal_date: " <<  cal_date.toStdString() << std::endl;
 
     QSqlQuery query(QSqlDatabase::database());
-    QString cmd("SELECT cal FROM "DB_TABLE" WHERE site='" + site +
-                "' AND var_name='" + var_name + "' AND cal_date<'" + cal_date +
-                "' ORDER BY cal_date DESC LIMIT 1");
+    QString cmd("SELECT cal FROM "); cmd.append(DB_TABLE);
+    cmd +=	" WHERE site='" + site +
+                "' AND var_name='" + var_name +
+		"' AND cal_date<'" + cal_date +
+                "' ORDER BY cal_date DESC LIMIT 1";
     qDebug() << "cmd:" << cmd;
 
     QString prevString = "{}";
@@ -1958,8 +1966,9 @@ void MainWindow::viewFile(QString filename)
 void MainWindow::viewText(QString text, QString title)
 {
     ViewTextDialog viewTextDialog;
-    viewTextDialog.setWindowTitle(QApplication::translate("Ui::ViewTextDialog",
-      title.toStdString().c_str(), 0, QApplication::UnicodeUTF8));
+    viewTextDialog.setWindowTitle(title);
+//    viewTextDialog.setWindowTitle(QApplication::translate("Ui::ViewTextDialog",
+//      title.toStdString().c_str(), 0, QApplication::UnicodeUTF8));
     viewTextDialog.setContents(&text);
     viewTextDialog.exec();
 }

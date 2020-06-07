@@ -1,9 +1,9 @@
 #ifndef _MainWindow_h_
 #define _MainWindow_h_
 
-#include <QtGui/QMainWindow>
-#include <QtCore/QSignalMapper>
-#include <QtGui/QTableView>
+#include <QMainWindow>
+#include <QSignalMapper>
+#include <QTableView>
 
 #include <map>
 #include <string>

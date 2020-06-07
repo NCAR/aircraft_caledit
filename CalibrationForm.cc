@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include <QtGui/QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlRelationalDelegate>
 
@@ -55,7 +55,7 @@ CalibrationForm::CalibrationForm(QWidget* parent) : QWidget(parent)
     }
     _tableWidget->resizeColumnsToContents();
     _tableWidget->horizontalHeader()->setStretchLastSection( true );
-    _tableWidget->horizontalHeader()->setResizeMode(1, QHeaderView::Fixed);
+    _tableWidget->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Fixed);
 
     _currCalCList.append(_currCalC0);
     _currCalCList.append(_currCalC1);

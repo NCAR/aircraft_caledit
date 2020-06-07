@@ -5,11 +5,11 @@ import eol_scons
 
 from SCons.Errors import StopError
 
-env = Environment(tools = ['default', 'qt4', 'qwt', 'gsl'])
+env = Environment(tools = ['default', 'qt5', 'qtsql', 'qtgui', 'qtwidgets', 'qtnetwork', 'qtcore', 'qwt', 'gsl'])
 
-qt4Modules = Split('QtSql QtGui QtCore QtNetwork')
-if not env.EnableQt4Modules(qt4Modules):
-    raise StopError("qt4 modules could not be enabled.")
+#qt4Modules = Split('QtSql QtGui QtCore QtNetwork')
+#if not env.EnableQt4Modules(qt4Modules):
+#    raise StopError("qt4 modules could not be enabled.")
 
 if not env.EnableQwt():
     raise StopError("qwt.h not found.  "
@@ -27,7 +27,7 @@ uis = Split("""
     CalibrationForm.ui
 """)
 
-env.Uic4(uis)
+env.Uic5(uis)
 
 sources = Split("""
     main.cc
