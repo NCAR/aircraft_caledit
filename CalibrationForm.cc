@@ -3,6 +3,11 @@
 
 #include <iostream>
 
+// CentOS7 Qt5.9 pkg-config Qt5Widgets should define this, but is not.
+#ifndef QT_WIDGETS_LIB
+#define QT_WIDGETS_LIB
+#endif
+
 #include <QtCore/QAbstractItemModel>
 #include <QtCore/QStringListModel>
 #include <QtWidgets/QButtonGroup>
