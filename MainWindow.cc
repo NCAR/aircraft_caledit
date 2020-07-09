@@ -56,7 +56,7 @@
 #include "PolyEval.h"
 
 #define MAX_BATH_PROBES 10
-#define PATH_TO_BATH_CALS "/Configuration/raf/cal_files/Bath"
+#define PATH_TO_BATH_CALS "/Configuration/cal_files/Bath"
 #define DECADE_BOX_WIRE_RESISTANCE 0.03 // Ohms
 //#define DECADE_BOX_WIRE_RESISTANCE 0  // Remove resistance when requested by Friesen
 
@@ -110,7 +110,7 @@ protected:
 private:
     QAbstractItemModel *_model;
 
-    /// model's row id (rid) to color mapping; temporary model data. 
+    /// model's row id (rid) to color mapping; temporary model data.
     QMap<QString, QColor> m_colorMap;
 };
 /* -------------------------------------------------------------------- */
@@ -195,7 +195,7 @@ cerr<<"Host is:"<<QHostInfo::localHostName().toStdString()<<"\n";
     }
     // extract some environment variables
     calfile_dir = QString::fromLatin1(getenv("PROJ_DIR")) +
-                         "/Configuration/raf/cal_files/";
+                         "/Configuration/cal_files/";
     csvfile_dir = QString::fromLatin1(getenv("PWD")) +
                          "/";
 
