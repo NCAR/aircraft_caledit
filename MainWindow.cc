@@ -22,6 +22,7 @@
 #include <QtCore/QList>
 #include <QtCore/QProcess>
 #include <QtCore/QRegExp>
+#include <QtCore/QStringList>
 #include <QtCore/QTextStream>
 #include <QtCore/QUuid>
 
@@ -169,7 +170,8 @@ void MainWindow::setupDatabase()
 */
     // List of remote sites that fill a calibration database.
     QStringList siteList;
-    siteList << "raf-acrouter.eol.ucar.edu";	// Tech labstation.
+//    siteList << "raf-acrouter.eol.ucar.edu";	// Tech labstation.
+    siteList << "petajouleslab.eol.ucar.edu";
     siteList << "hyper.raf-guest.ucar.edu";
     siteList << "hercules.raf-guest.ucar.edu";
 
@@ -2030,6 +2032,21 @@ void MainWindow::exportAnalog(int row)
 {
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
+    size_t nChannels = 8;	// Default to NCAR A/D for now.
+    int Mask = 0xff;
+    QStringList cals[8];
+
+    /* Extract the sensor_type so we can determine which analog card.
+     *  - NCAR A/D has 8 channels and cal file will have linear cal
+     *  - gpDAQ has 4 channels and cal file will have 3rd order cal
+     */
+    QString sensor_type = modelData(row, clm_sensor_type);
+    std::cout << "sensor_type: " <<  sensor_type.toStdString() << std::endl;
+    if (sensor_type == "analog_gpDAQ") {
+        Mask = 0x0f;
+        nChannels = 4;
+    }
+
     // extract the serial_number of the A2D card from the current row
     QString serial_number = modelData(row, clm_serial_number);
     std::cout << "serial_number: " <<  serial_number.toStdString() << std::endl;
@@ -2041,22 +2058,8 @@ void MainWindow::exportAnalog(int row)
     QString cal_date = modelData(row, clm_cal_date);
     QDateTime ut, ct = QDateTime::fromString(cal_date, Qt::ISODate);
 
-    // extract the cal coefficients from the selected row
-    QString offst[8];
-    QString slope[8];
-    // Exponential notation O.K. - JAA 9/27/2016
-    QRegExp rxCoeff2("\\{([+-]?\\d+[\\.]?\\d*[e]?[+-]?\\d*),([+-]?\\d+[\\.]?\\d*[e]?[+-]?\\d*)\\}");
-
-    QString cal = modelData(row, clm_cal);
-    if (rxCoeff2.indexIn(cal) == -1) {
-        QMessageBox::information(0, tr("notice"),
-          tr("You must select a calibration matching\n\n'") + rxCoeff2.pattern() +
-          tr("'\n\nto export an analog calibration."));
-        return;
-    }
     int channel = modelData(row, clm_channel).toInt();
-    offst[channel] = rxCoeff2.cap(1);
-    slope[channel] = rxCoeff2.cap(2);
+    cals[channel] = extractListFromBracedCSV(modelData(row, clm_cal));
     int chnMask = 1 << channel;
 
     // search for the other channels and continue extracting coefficients...
@@ -2065,6 +2068,7 @@ void MainWindow::exportAnalog(int row)
         if (--topRow < 0)                                          break;
         if           ("1" == modelData(topRow, clm_removed))       continue;
         if (serial_number != modelData(topRow, clm_serial_number)) break;
+        if   (sensor_type != modelData(topRow, clm_sensor_type))   break;
         if      ("analog" != modelData(topRow, clm_cal_type))      break;
         if      (gainbplr != modelData(topRow, clm_gainbplr))      break;
 
@@ -2072,20 +2076,12 @@ void MainWindow::exportAnalog(int row)
         ut = QDateTime::fromString(cal_date, Qt::ISODate);
         qDebug() << "| " << ut << " - " << ct << " | = "
                  << std::abs(ut.secsTo(ct))
-                 << " > " << 72*60*60;
-        // Calibrations should be within 3 days of one another
-        if (std::abs(ut.secsTo(ct)) > 72*60*60) break;
+                 << " > " << 120*60*60;
+        // Calibrations should be within 5 days of one another
+        if (std::abs(ut.secsTo(ct)) > 120*60*60) break;
 
-        cal = modelData(topRow, clm_cal);
-        if (rxCoeff2.indexIn(cal) == -1) {
-            QMessageBox::information(0, tr("notice"),
-              tr("You must select a calibration matching\n\n'") + rxCoeff2.pattern() +
-              tr("'\n\nto export an analog calibration."));
-            return;
-        }
         channel = modelData(topRow, clm_channel).toInt();
-        offst[channel] = rxCoeff2.cap(1);
-        slope[channel] = rxCoeff2.cap(2);
+        cals[channel] = extractListFromBracedCSV(modelData(topRow, clm_cal));
         chnMask |= 1 << channel;
 
         // select the rows of what's found
@@ -2100,6 +2096,7 @@ void MainWindow::exportAnalog(int row)
         if (++btmRow > numRows)                                    break;
         if           ("1" == modelData(btmRow, clm_removed))       continue;
         if (serial_number != modelData(btmRow, clm_serial_number)) break;
+        if   (sensor_type != modelData(topRow, clm_sensor_type))   break;
         if      ("analog" != modelData(btmRow, clm_cal_type))      break;
         if      (gainbplr != modelData(btmRow, clm_gainbplr))      break;
 
@@ -2107,20 +2104,12 @@ void MainWindow::exportAnalog(int row)
         ut = QDateTime::fromString(cal_date, Qt::ISODate);
         qDebug() << "| " << ut << " - " << ct << " | = "
                  << std::abs(ut.secsTo(ct))
-                 << " > " << 72*60*60;
+                 << " > " << 120*60*60;
         // Calibrations should be within 3 days of one another
-        if (std::abs(ut.secsTo(ct)) > 72*60*60) break;
+        if (std::abs(ut.secsTo(ct)) > 120*60*60) break;
 
-        cal = modelData(btmRow, clm_cal);
-        if (rxCoeff2.indexIn(cal) == -1) {
-            QMessageBox::information(0, tr("notice"),
-              tr("You must select a calibration matching\n\n'") + rxCoeff2.pattern() +
-              tr("'\n\nto export an analog calibration."));
-            return;
-        }
         channel = modelData(btmRow, clm_channel).toInt();
-        offst[channel] = rxCoeff2.cap(1);
-        slope[channel] = rxCoeff2.cap(2);
+        cals[channel] = extractListFromBracedCSV(modelData(btmRow, clm_cal));
         chnMask |= 1 << channel;
 
         // select the rows of what's found
@@ -2129,11 +2118,11 @@ void MainWindow::exportAnalog(int row)
     } while (true);
     btmRow--;
 
-    // complain if the found selection is discontiguous or an undistinct set of 8
-    int numFound  = btmRow - topRow + 1;
+    // complain if the found selection is discontiguous or an undistinct set of nChannels
+    size_t numFound  = btmRow - topRow + 1;
     std::cout << "chnMask: 0x" << std::hex << chnMask << std::dec << std::endl;
     std::cout << "numFound: " << numFound << std::endl;
-    if ((chnMask != 0xff) || (numFound != 8)) {
+    if ((chnMask != Mask) || (numFound != nChannels)) {
         QMessageBox::information(0, tr("notice"),
           tr("Discontiguous or an undistinct selection found.\n\n") +
           tr("You need 8 channels selected to generate a calibration dat file!"));
@@ -2160,8 +2149,12 @@ void MainWindow::exportAnalog(int row)
     ostr << "# temperature: " << temperature.toStdString() << std::endl;
     ostr << "# Comment: " << comment.toStdString() << std::endl;
     ostr << "#  Date              Gain  Bipolar";
-    for (uint ix=0; ix<8; ix++)
-        ostr << "  CH" << ix << "-off   CH" << ix << "-slope";
+    for (size_t ix = 0; ix < nChannels; ix++)
+    {
+        ostr << "      CH" << ix << "-off    CH" << ix << "-slope";
+        if (sensor_type == "analog_gpDAQ")
+            ostr << "   C2       C3";
+    }
     ostr << std::endl;
 
     ostr << ut.toString("yyyy MMM dd HH:mm:ss").toStdString();
@@ -2174,9 +2167,19 @@ void MainWindow::exportAnalog(int row)
     gainbplr_out["4F"] = "    4       0     ";
     ostr << gainbplr_out[gainbplr];
 
-    for (uint ix=0; ix<8; ix++) {
-        ostr << "  " << offst[ix].leftJustified(9).toStdString()
-             << " "  << slope[ix].leftJustified(8).toStdString();
+    for (size_t ix = 0; ix < nChannels; ix++) {
+        ostr << "  " << cals[ix].at(0).leftJustified(9).toStdString()
+             << " "  << cals[ix].at(1).leftJustified(8).toStdString();
+
+        if (sensor_type == "analog_gpDAQ")
+        {
+            // Cal file is 3rd order, pad cals out if needed.
+            for (int j = cals[ix].size(); j < 4; ++j)
+                cals[ix] << "0.0";
+
+            ostr << " " << cals[ix].at(2).leftJustified(8).toStdString()
+                 << " " << cals[ix].at(3).leftJustified(8).toStdString();
+        }
     }
     ostr << std::endl;
 
