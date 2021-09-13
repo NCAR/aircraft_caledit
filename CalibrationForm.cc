@@ -146,7 +146,9 @@ QStringListModel* CalibrationForm::setupComboModel(QString sql_column)
     if (sql_column == "cal_type")
         items << "bath" << "analog" << "instrument";
 
-    items = items.toSet().toList();
+    // remove duplicates and sort.
+    QSet<QString> set(items.begin(), items.end());
+    items = QStringList(set.begin(), set.end());
     items.sort();
 
 //  foreach(QString item, items)

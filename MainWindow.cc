@@ -123,7 +123,7 @@ MainWindow::MainWindow() : onAircraft(false),_model(0), changeDetected(false)
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     // Seed the random number generator used to create UUIDs.
-    qsrand(time(0));
+    srand(time(0));
     qDebug() << QUuid::createUuid();
     qDebug() << QUuid::createUuid();
     qDebug() << QUuid::createUuid();
@@ -1184,17 +1184,17 @@ Reference(C), Harco 708094A(Ohm), Harco 708094B(Ohm), Rosemount 2984(Ohm)
             if (++n == nDataPerSetPoint) {
                 double setPoint = gsl_stats_mean (setPointVal, 1, nDataPerSetPoint);
                 QString aQStr;
-                aQStr.sprintf("%7.3f", setPoint);
+                aQStr.asprintf("%7.3f", setPoint);
 //              qDebug() << "setPoint:" << aQStr;
                 list_set_points << aQStr;
 
                 for (int c=0; c<nVariables; c++) {
                     double average = gsl_stats_mean (value[c], 1, nDataPerSetPoint);
                     double stddev  = gsl_stats_sd   (value[c], 1, nDataPerSetPoint);
-                    aQStr.sprintf("%7.3f", average);
+                    aQStr.asprintf("%7.3f", average);
 //                  qDebug() << "average: " << aQStr;
                     list_averages[c] << aQStr;
-                    aQStr.sprintf("%9.6f", stddev);
+                    aQStr.asprintf("%9.6f", stddev);
 //                  qDebug() << "stddev:  " << aQStr;
                     list_stddevs[c]  << aQStr;
                 }
@@ -2255,7 +2255,7 @@ void MainWindow::exportBath(int row)
         double a = iA.next().toDouble();
         double d = iD.next().toDouble();
         QString line;
-        line.sprintf("\n  %7.3f         %6.3f           %9.6f"
+        line.asprintf("\n  %7.3f         %6.3f           %9.6f"
                      "     _________\n",
                      p, a - DECADE_BOX_WIRE_RESISTANCE, d);
         ostr << line.toStdString();
