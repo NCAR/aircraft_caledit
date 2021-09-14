@@ -9,6 +9,7 @@
 #endif
 
 #include <QtCore/QAbstractItemModel>
+#include <QtCore/QSet>
 #include <QtCore/QStringListModel>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QDataWidgetMapper>
@@ -147,8 +148,12 @@ QStringListModel* CalibrationForm::setupComboModel(QString sql_column)
         items << "bath" << "analog" << "instrument";
 
     // remove duplicates and sort.
+#if QT_VERSION < QT_VERSION_CHECK(5, 10, 0)
+    items = items.toSet().toList();
+#else
     QSet<QString> set(items.begin(), items.end());
     items = QStringList(set.begin(), set.end());
+#endif
     items.sort();
 
 //  foreach(QString item, items)
