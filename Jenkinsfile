@@ -16,7 +16,7 @@ pipeline {
   }
   post {
     success {
-      mail(to: 'cjw@ucar.edu cdewerd@ucar.edu janine@ucar.edu taylort@ucar.edu', body: 'aircraft_caledit Jenkinsfile build successful')
+      mail(to: 'cjw@ucar.edu cdewerd@ucar.edu janine@ucar.edu taylort@ucar.edu', subject: 'aircraft_caledit Jenkinsfile build successful', body: 'aircraft_caledit Jenkinsfile build successful')
     }
   }
   options {
