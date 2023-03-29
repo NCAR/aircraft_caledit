@@ -172,6 +172,7 @@ void MainWindow::setupDatabase()
     QStringList siteList;
 //    siteList << "raf-acrouter.eol.ucar.edu";	// Tech labstation.
     siteList << "petajouleslab.eol.ucar.edu";
+    siteList << "gigajoules-router.eol.ucar.edu";
     siteList << "hyper.raf-guest.ucar.edu";
     siteList << "hercules.raf-guest.ucar.edu";
 
