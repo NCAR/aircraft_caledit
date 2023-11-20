@@ -1,7 +1,7 @@
 pipeline {
   agent {
      node { 
-        label 'RHEL7_x86_64'
+        label 'CentOS9'
         } 
   }
   triggers {
@@ -16,7 +16,7 @@ pipeline {
   }
   post {
     failure {
-      mail(to: 'cjw@ucar.edu cdewerd@ucar.edu janine@ucar.edu taylort@ucar.edu', subject: 'aircraft_caledit Jenkins build failed', body: 'aircraft_caledit Jenkins build failed')
+      mail(to: 'cjw@ucar.edu cdewerd@ucar.edu janine@ucar.edu', subject: 'aircraft_caledit Jenkins build failed', body: 'aircraft_caledit Jenkins build failed')
     }
   }
   options {
