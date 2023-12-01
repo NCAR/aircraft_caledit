@@ -1019,7 +1019,7 @@ void MainWindow::importRemoteCalibTable(QString remote)
           tr("cannot contact:\n") + remote);
         return;
     }
-    QString connectStr = QString("'host=%1 user=ads password=snoitarbilac "
+    QString connectStr = QString("'host=%1 user=ads "
                        "dbname=%2'").arg(remote).arg(DB_NAME);
     qDebug() << "connectStr:" << connectStr;
 
