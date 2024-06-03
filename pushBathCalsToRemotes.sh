@@ -1,6 +1,6 @@
 #!/bin/sh
 
-master="barolo"
+master="eol-rosetta"
 ping -c 1 $master
 if [[ $? -ne 0 ]] ; then
   echo "Master calibration database server '"$master"' is offline."
