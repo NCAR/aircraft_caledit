@@ -9,7 +9,7 @@ env = Environment(tools = ['default', 'qt5', 'qtsql', 'qtgui', 'qtwidgets', 'qtn
 
 # Compilation generates numerous warnings relative to the Qt4 code base itself when -Weffc++ is enabled
 #env['CXXFLAGS'] = ['-Weffc++','-Wall','-O2' ]
-env['CXXFLAGS'] = [ '-Wall','-O2','-std=c++11' ]
+env['CXXFLAGS'] = [ '-Wall','-std=c++11' ]
 
 uis = Split("""
     ViewTextDialog.ui

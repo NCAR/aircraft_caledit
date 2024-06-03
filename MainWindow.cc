@@ -170,11 +170,10 @@ void MainWindow::setupDatabase()
 */
     // List of remote sites that fill a calibration database.
     QStringList siteList;
-//    siteList << "raf-acrouter.eol.ucar.edu";	// Tech labstation.
-    siteList << "petajoules.eol.ucar.edu";
-    siteList << "gigajoules.eol.ucar.edu";
-    siteList << "hyper.raf-guest.ucar.edu";
-    siteList << "hercules.raf-guest.ucar.edu";
+    siteList << "petajoules.eol.ucar.edu";	// Tech labstation
+    siteList << "gigajoules.eol.ucar.edu";	// EE labstation
+    siteList << "hyper.raf-guest.ucar.edu";	// GV
+    siteList << "hercules.raf-guest.ucar.edu";	// C130
 
 cerr<<"Host is:"<<QHostInfo::localHostName().toStdString()<<"\n";
     tailNumIdx[0] = "Lab_N600";
@@ -1039,7 +1038,7 @@ void MainWindow::importRemoteCalibTable(QString remote)
       "var_name character varying(20),"
       "dsm_name character varying(16),"
       "cal_type character varying(16),"
-      "channel character(1),"
+      "channel character(2),"
       "gainbplr character(2),"
       "ads_file_name character varying(200),"
       "set_times timestamp without time zone[],"
@@ -2034,18 +2033,24 @@ void MainWindow::exportAnalog(int row)
     std::cout << __PRETTY_FUNCTION__ << std::endl;
 
     size_t nChannels = 8;	// Default to NCAR A/D for now.
-    int Mask = 0xff;
-    QStringList cals[8];
+    int Mask = 0x00ff;
+    QStringList cals[16];
 
     /* Extract the sensor_type so we can determine which analog card.
      *  - NCAR A/D has 8 channels and cal file will have linear cal
      *  - gpDAQ has 4 channels and cal file will have 3rd order cal
+     *  - Diamond has 16 channels and cal file will have 3rd order cal
      */
     QString sensor_type = modelData(row, clm_sensor_type);
     std::cout << "sensor_type: " <<  sensor_type.toStdString() << std::endl;
     if (sensor_type == "analog_gpDAQ") {
-        Mask = 0x0f;
+        Mask = 0x000f;
         nChannels = 4;
+    }
+    else
+    if (sensor_type == "analog_diamond") {
+        Mask = 0xffff;
+        nChannels = 16;
     }
 
     // extract the serial_number of the A2D card from the current row
@@ -2124,9 +2129,8 @@ void MainWindow::exportAnalog(int row)
     std::cout << "chnMask: 0x" << std::hex << chnMask << std::dec << std::endl;
     std::cout << "numFound: " << numFound << std::endl;
     if ((chnMask != Mask) || (numFound != nChannels)) {
-        QMessageBox::information(0, tr("notice"),
-          tr("Discontiguous or an undistinct selection found.\n\n") +
-          tr("You need 8 channels selected to generate a calibration dat file!"));
+        QString msg = QString("Discontiguous or an undistinct selection found.\n\nYou need %1 channels selected to generate a calibration dat file!").arg(nChannels);
+        QMessageBox::information(0, tr("notice"), msg);
         return;
     }
     // extract temperature from the btmRow
@@ -2153,7 +2157,7 @@ void MainWindow::exportAnalog(int row)
     for (size_t ix = 0; ix < nChannels; ix++)
     {
         ostr << "      CH" << ix << "-off    CH" << ix << "-slope";
-        if (sensor_type == "analog_gpDAQ")
+        if (sensor_type == "analog_gpDAQ" || sensor_type == "analog_diamond")
             ostr << "   C2       C3";
     }
     ostr << std::endl;
@@ -2172,7 +2176,7 @@ void MainWindow::exportAnalog(int row)
         ostr << "  " << cals[ix].at(0).leftJustified(9).toStdString()
              << " "  << cals[ix].at(1).leftJustified(8).toStdString();
 
-        if (sensor_type == "analog_gpDAQ")
+        if (sensor_type == "analog_gpDAQ" || sensor_type == "analog_diamond")
         {
             // Cal file is 3rd order, pad cals out if needed.
             for (int j = cals[ix].size(); j < 4; ++j)
