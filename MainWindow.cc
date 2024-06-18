@@ -172,7 +172,7 @@ void MainWindow::setupDatabase()
     QStringList siteList;
     siteList << "petajoules.eol.ucar.edu";	// Tech labstation
     siteList << "gigajoules.eol.ucar.edu";	// EE labstation
-    siteList << "hyper.raf-guest.ucar.edu";	// GV
+    siteList << "hyper.eol.ucar.edu";	// GV
     siteList << "hercules.raf-guest.ucar.edu";	// C130
 
 cerr<<"Host is:"<<QHostInfo::localHostName().toStdString()<<"\n";
