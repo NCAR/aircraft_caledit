@@ -1893,6 +1893,7 @@ void MainWindow::viewCalButtonClicked()
 
     // get the cal_type from the selected row
     QString cal_type = modelData(row, clm_cal_type);
+    QString sensor_type   = modelData(row, clm_sensor_type);
 
     QString filename = calfile_dir;
 
@@ -1903,7 +1904,7 @@ void MainWindow::viewCalButtonClicked()
         QString site = modelData(row, clm_site);
 
 #ifndef SANDBOX
-        filename += QString("Engineering/") + site + "/";
+        filename += QString("Engineering/") + site + QString("/");
 #endif
         filename += var_name + ".dat";
     }
@@ -1914,15 +1915,17 @@ void MainWindow::viewCalButtonClicked()
 #ifndef SANDBOX
         filename += QString("A2D/");
 #endif
-        filename += "A2D" + serial_number + ".dat";
+	if (sensor_type == "analog_diamond"){
+            filename += QString("DMMAT/"); 
+	}
+        filename += QString("A2D") + QString(serial_number) + QString(".dat");
     }
     else if (cal_type == "bath") {
         QString project_name  = modelData(row, clm_project_name);
-        QString sensor_type   = modelData(row, clm_sensor_type);
         QString serial_number = modelData(row, clm_serial_number);
 
         filename = csvfile_dir;
-        filename += project_name + "_" + sensor_type + "_" + serial_number + ".bath";
+        filename += project_name + QString("_") + sensor_type + QString("_") + serial_number + QString(".bath");
     }
     else
         return;
