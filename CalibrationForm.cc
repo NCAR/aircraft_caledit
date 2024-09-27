@@ -139,7 +139,6 @@ QStringListModel* CalibrationForm::setupComboModel(QString sql_column)
 //  std::cout << sql.toStdString() << std::endl;
 
     QSqlQuery query(sql, QSqlDatabase::database() );
-    query.exec();
     while (query.next())
         items << query.value(0).toString().trimmed();
     query.finish();

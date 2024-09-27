@@ -410,7 +410,6 @@ MainWindow::~MainWindow()
     QString cmd = QString("ALTER TABLE ONLY %1 ADD CONSTRAINT %2_rid_key UNIQUE (rid)").arg(DB_TABLE).arg(DB_TABLE);
     qDebug() << "cmd:" << cmd;
     QSqlQuery query(cmd);
-    query.exec();
     query.finish();
 
     QSqlDatabase::database().close();
