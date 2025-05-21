@@ -172,8 +172,8 @@ void MainWindow::setupDatabase()
     QStringList siteList;
     siteList << "petajoules.eol.ucar.edu";	// Tech labstation
     siteList << "gigajoules.eol.ucar.edu";	// EE labstation
-    siteList << "hyper.eol.ucar.edu";	// GV
-    siteList << "hercules.raf-guest.ucar.edu";	// C130
+    siteList << "hyper.eol.ucar.edu";		// GV
+    siteList << "hercules.eol.ucar.edu";	// C130
 
 cerr<<"Host is:"<<QHostInfo::localHostName().toStdString()<<"\n";
     tailNumIdx[0] = "Lab_N600";
