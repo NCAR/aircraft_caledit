@@ -28,7 +28,8 @@ The calibration process is as follows:
        * Either wait for /net/jlocal/projects/scripts/backupCalib.cron to run from ads cron on Monday at 5am, or you can run it manually now.
        * Commit changes to github.
 
- * Select cals you want to export to a nidas cal file
+**Reach out to the PM and Josh Carnes for guidance on what to export. Not all cals need to be exported every time, ie if cals have not changed significantly, or for post-project cals (which won't be applied to that project because of the date being after project)**
+ * For cals you want to export to a nidas cal file:
    * ADIFR, BDIFR, QCF, QCR, QCFR are all serial pressure sensors. Cals are only done to ensure they aren't malfuctioning - nothing to export
    * Right click the line in caledit and click "Export to Cal File"
    * git commit/push projects/Configuration/cal_files
