@@ -16,15 +16,15 @@ The calibration process is as follows:
 
 * Technicians will perform the calibrations using Calibration Flight mode and will generate plots showing that past and current cals agree.
 * Technicians will email plots to rafsehelp@eol.ucar.edu, appropriate RSIG and PM staff for review
- * caledit can be used to review the ADS cals for approval if more information is required than is contained in the emailed plots.
- * A print screen from aeros can also be a useful review tool.
+  * caledit can be used to review the ADS cals for approval if more information is required than is contained in the emailed plots.
+  * A print screen from aeros can also be a useful review tool.
 * SEs will sweep the cals from the aircraft into the calibrations database
- * The aircraft you want to sweep must be powered up and online.
- * Run caledit as user ads on eol-rosetta
-   * To confirm cals are in the database: "psql -h eol-rosetta -U ads -d calibrations" and "select * from calibrations where project_name='<PROJECT>';
-   * Changes will be backed up to /net/jlocal/projects/Configuration/cal_files/master-calibrations.sql
-     * Either wait for /net/jlocal/projects/scripts/backupCalib.cron to run from ads cron on eol-rosetta on Monday at 5am, or you can run it manually now.
-     * Commit changes to github.
+  * The aircraft you want to sweep must be powered up and online.
+  * Run caledit as user ads on eol-rosetta
+     * To confirm cals are in the database: "psql -h eol-rosetta -U ads -d calibrations" and "select * from calibrations where project_name='<PROJECT>';
+     * Changes will be backed up to /net/jlocal/projects/Configuration/cal_files/master-calibrations.sql
+       * Either wait for /net/jlocal/projects/scripts/backupCalib.cron to run from ads cron on eol-rosetta on Monday at 5am, or you can run it manually now.
+       * Commit changes to github.
 
 
  * Select cals you want to export to a nidas cal file
