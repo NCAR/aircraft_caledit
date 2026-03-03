@@ -1173,7 +1173,7 @@ Reference(C), Harco 708094A(Ohm), Harco 708094B(Ohm), Rosemount 2984(Ohm)
         while(!file.atEnd()) {
             line = file.readLine();
 //          qDebug() << "line: " << line;
-            list = line.simplified().split(" ");
+            list = line.split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
 
             setPointVal[n] = list.at(0).toDouble();
 
@@ -1182,20 +1182,16 @@ Reference(C), Harco 708094A(Ohm), Harco 708094B(Ohm), Rosemount 2984(Ohm)
 
             if (++n == nDataPerSetPoint) {
                 double setPoint = gsl_stats_mean (setPointVal, 1, nDataPerSetPoint);
-                QString aQStr;
-                aQStr.asprintf("%7.3f", setPoint);
-//              qDebug() << "setPoint:" << aQStr;
-                list_set_points << aQStr;
+                list_set_points << QString::number(setPoint, 'f', 3);
+//              qDebug() << "setPoint:" << list_set_points;
 
                 for (int c=0; c<nVariables; c++) {
                     double average = gsl_stats_mean (value[c], 1, nDataPerSetPoint);
                     double stddev  = gsl_stats_sd   (value[c], 1, nDataPerSetPoint);
-                    aQStr.asprintf("%7.3f", average);
-//                  qDebug() << "average: " << aQStr;
-                    list_averages[c] << aQStr;
-                    aQStr.asprintf("%9.6f", stddev);
-//                  qDebug() << "stddev:  " << aQStr;
-                    list_stddevs[c]  << aQStr;
+                    list_averages[c] << QString::number(average, 'f', 3);
+//                  qDebug() << "average: " << list_averages[c];
+                    list_stddevs[c]  << QString::number(stddev, 'f', 3);
+//                  qDebug() << "stddev:  " << list_stddevs[c];
                 }
                 n = 0;
             }
