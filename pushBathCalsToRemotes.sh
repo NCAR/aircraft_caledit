@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# fully qualify this
 master="eol-rosetta"
 ping -c 1 $master
 if [[ $? -ne 0 ]] ; then
@@ -7,7 +8,7 @@ if [[ $? -ne 0 ]] ; then
   exit
 fi
 
-for server in raf-acrouter.eol.ucar.edu hyper.eol.ucar.edu hercules.raf-guest.ucar.edu; do
+for server in raf-acrouter.eol.ucar.edu hyper.eol.ucar.edu hercules.eol.ucar.edu; do
   echo "Pushing bath cals to:" $server
   ping -c 1 $server
   if [[ $? -eq 0 ]] ; then
