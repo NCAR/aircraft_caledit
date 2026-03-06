@@ -8,7 +8,7 @@ if [[ $? -ne 0 ]] ; then
   exit
 fi
 
-for server in raf-acrouter.eol.ucar.edu hyper.eol.ucar.edu hercules.eol.ucar.edu; do
+for server in petajoules.eol.ucar.edu hyper.eol.ucar.edu hercules.eol.ucar.edu; do
   echo "Pushing bath cals to:" $server
   ping -c 1 $server
   if [[ $? -eq 0 ]] ; then
