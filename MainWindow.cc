@@ -219,8 +219,10 @@ cerr<<"Host is:"<<QHostInfo::localHostName().toStdString()<<"\n";
         openDatabase(DB_HOST);
 
         if (reply == QMessageBox::Yes)
+        {
             foreach(QString site, siteList)
                 importRemoteCalibTable(site);
+        }
     } else {
         openDatabase("localhost");
     }
@@ -804,9 +806,9 @@ void MainWindow::setupMenus()
 
     // File menu setup...
     QMenu *fileMenu = new QMenu(tr("&File"), this);
-    fileMenu->addAction(tr("&Import"), this, SLOT(importButtonClicked()), Qt::CTRL + Qt::Key_I);
-    fileMenu->addAction(tr("&Save"),   this, SLOT(saveButtonClicked()),   Qt::CTRL + Qt::Key_S);
-    fileMenu->addAction(tr("&Quit"),   this, SLOT(onQuit()),              Qt::CTRL + Qt::Key_Q);
+    fileMenu->addAction(tr("&Import"), this, SLOT(importButtonClicked()), QKeySequence(Qt::CTRL + Qt::Key_I));
+    fileMenu->addAction(tr("&Save"),   this, SLOT(saveButtonClicked()),   QKeySequence::Save);
+    fileMenu->addAction(tr("&Quit"),   this, SLOT(onQuit()),              QKeySequence::Quit);
 //  connect(this, SIGNAL(aboutToQuit()), this, SLOT(onQuit()));
     menuBar()->addMenu(fileMenu);
 
